@@ -1,0 +1,38 @@
+{
+  "name": "@monopoly/root",
+  "version": "1.0.0",
+  "description": "Monopoly in TypeScript",
+  "scripts": {
+    "build:sdk": "pnpm --filter @monopoly/sdk run build",
+    "watch:sdk": "pnpm --filter @monopoly/sdk run dev",
+    "backend:dev": "pnpm --filter @monopoly/backend run start:dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Kevin Vogel",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.16.0",
+    "pnpm": ">=8.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.12",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "eslint": "^8.40.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8",
+    "prettier-plugin-organize-imports": "^3.2.2",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.0.1",
+    "class-sanitizer": "^1.0.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "socket.io": "^4.6.1",
+    "socket.io-parser": "^4.2.2"
+  }
+}
