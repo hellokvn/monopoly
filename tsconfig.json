@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    // NestJS original
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -18,11 +17,6 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-
-    // Custom
     "composite": false
-    // "resolveJsonModule": true,
-    // "typeRoots": ["@types"],
-    // "types": ["node", "jest"]
   }
 }

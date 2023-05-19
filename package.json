@@ -6,6 +6,7 @@
     "build:sdk": "pnpm --filter @monopoly/sdk run build",
     "watch:sdk": "pnpm --filter @monopoly/sdk run dev",
     "backend:dev": "pnpm --filter @monopoly/backend run start:dev",
+    "frontend:dev": "pnpm --filter @monopoly/frontend run serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
