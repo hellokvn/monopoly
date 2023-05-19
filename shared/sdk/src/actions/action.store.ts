@@ -5,7 +5,7 @@ import { MoveToAction } from './move-to.action';
 import { MoveAction } from './move.action';
 import { TaxAction } from './tax.action';
 
-export const ACTIONS: Action[] = [
+export const ALL_ACTIONS: Action[] = [
   new MoveAction('Go 5 Felder nach vorne.', 5, true),
   new MoveAction('Go 5 Felder zurück.', 5, false),
   new MoveAction('Go 3 Felder nach vorne.', 3, true),

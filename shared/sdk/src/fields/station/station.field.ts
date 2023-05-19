@@ -1,15 +1,13 @@
-import { Field } from './base.field';
+import { Field } from '../base/base.field';
+import { FieldFamily } from '../field.enum';
 
 export class StationField extends Field {
   public readonly rentMatrix: number[];
-  public readonly price: number;
 
-  constructor(name: string) {
-    super(name);
+  constructor(id: number, name: string, family: FieldFamily) {
+    super(id, name, family);
 
-    this.isBuyable = true;
     this.isBuildable = false;
-    this.familyIndex = 2;
     this.price = 2500;
     this.rentMatrix = [0, 1, 2, 3, 4];
   }
