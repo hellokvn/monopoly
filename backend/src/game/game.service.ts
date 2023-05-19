@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game, GameStatus, Player } from './game.schema';
 import { saveGame } from '../common/helpers/game.helper';
-import { Dice } from '@monopoly/sdk';
+import { ALL_FIELDS, Dice, FACTORY_IDS, FactoryField, STATION_IDS, StationField, StreetField } from '@monopoly/sdk';
 
 @Injectable()
 export class GameService {
@@ -35,11 +35,6 @@ export class GameService {
       throw new WsException('Player already joined this game.');
     }
 
-    // TODO: Remove, this is just for seamless testing.
-    if (game.players.length === 0) {
-      game.creatorClientId = client.id;
-    }
-
     const player = new Player();
     player.index = game.players.length;
     player.clientId = client.id;
@@ -47,48 +42,13 @@ export class GameService {
 
     game.players.push(player);
 
-    if (game.players.length >= 2) {
+    // TODO: For tests
+    if (game.players.length >= 1) {
       game.status = GameStatus.SetOrder;
     }
 
+    client.join(`GAME-${client.game._id.toString()}`);
+
     return saveGame(game);
-  }
-
-  public diceToMove({ game, player }: Socket): Promise<Game> {
-    const dice = new Dice();
-
-    player.move(dice);
-
-    return saveGame(game, player);
-  }
-
-  public diceToSetOrder({ game, player }: Socket): Promise<Game> {
-    console.log('diceToSetOrder', { game });
-    const { total } = new Dice();
-    let isTaken = false;
-    let isDone = true;
-
-    game.players.forEach(({ index, orderDice }) => {
-      if (index !== player.index) {
-        if (orderDice === total) {
-          isTaken = true;
-        } else if (!orderDice) {
-          isDone = false;
-        }
-      }
-    });
-
-    if (!isTaken) {
-      player.orderDice = total;
-      game.currentPlayerIndex = game.currentPlayerIndex + 1;
-    }
-
-    if (isDone) {
-      game.status = GameStatus.Started;
-      game.order = [0, 1];
-      game.currentPlayerIndex = game.order[0];
-    }
-
-    return saveGame(game, player);
   }
 }

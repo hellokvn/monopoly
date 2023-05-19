@@ -1,6 +1,5 @@
-import { getClient } from '../helpers/request.validator';
 import { WsException } from '@nestjs/websockets';
-import { Game, GameStatus, Player, PlayerStatus } from '../../game/game.schema';
+import { Game, GameField, GameStatus, Player, PlayerStatus } from '../../game/game.schema';
 import { plainToClass } from 'class-transformer';
 import { Document } from '../types/mongoose.type';
 
@@ -12,6 +11,20 @@ export const PLAYER_ALIVE = 'player-alive';
 
 type GamePermission = Array<typeof GAME_WAITING | typeof GAME_SET_ORDER | typeof GAME_STARTED | typeof PLAYER_TURN | typeof PLAYER_ALIVE>;
 
+interface GameOpts {
+  clientIndex?: number;
+  payloadIndex?: number;
+}
+
+// TODO: Works only if one active game by client
+function getGameByRoom(rooms: Set<string>): string | undefined {
+  for (const room of rooms) {
+    if (room.includes('GAME-')) {
+      return room.replace('GAME-', '');
+    }
+  }
+}
+
 export const GetGame =
   (permissions: GamePermission = []) =>
   (target, key, descriptor) => {
@@ -21,9 +34,9 @@ export const GetGame =
         throw new WsException('No arguments found.');
       }
 
-      const client = getClient(arguments);
-      const gameId = client.handshake.headers['game-id'];
-      const game = await this.model.findById(gameId).exec();
+      const client = arguments[0];
+      const payload = arguments[1];
+      const game = await this.model.findById(payload.gameId).exec();
 
       if (!game) {
         throw new WsException('No game found.');
@@ -42,7 +55,7 @@ export const GetGame =
   };
 
 export const GetGameAndValidatePlayer =
-  (permissions: GamePermission = []) =>
+  (permissions: GamePermission = [], opts: GameOpts = {}) =>
   (target, key, descriptor) => {
     const originalFunction: any = descriptor.value;
     descriptor.value = async function (this: any) {
@@ -52,13 +65,15 @@ export const GetGameAndValidatePlayer =
 
       console.log('GetGameAndValidatePlayer');
 
-      const client = getClient(arguments);
-      const gameId = client.handshake.headers['game-id'];
+      const client = arguments[opts.clientIndex || 0];
+      const gameId: string = getGameByRoom(client.rooms);
       const game: Document<Game> = await this.model.findById(gameId).exec();
 
       if (!game) {
         throw new WsException('No game found.');
       }
+
+      game.logs = [];
 
       if (permissions.includes(GAME_SET_ORDER) && game.status !== GameStatus.SetOrder) {
         throw new WsException(`Game status is wrong. (${game.status})`);
@@ -76,6 +91,10 @@ export const GetGameAndValidatePlayer =
 
       for (let index = 0; index < game.players.length; index++) {
         game.players[index] = plainToClass(Player, game.players[index]);
+      }
+
+      for (let index = 0; index < game.players.length; index++) {
+        game.fields[index] = plainToClass(GameField, game.fields[index]);
       }
 
       const player: Player = game.players[playerIndex];

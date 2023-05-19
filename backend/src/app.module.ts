@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AppGateway } from './app.gateway';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseConfigService } from './shared/mongodb/mongoose-config.service';
 import { GameModule } from './game/game.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -16,9 +14,8 @@ import { GameModule } from './game/game.module';
     MongooseModule.forRootAsync({
       useClass: MongooseConfigService,
     }),
+    ScheduleModule.forRoot(),
     GameModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, AppGateway],
 })
 export class AppModule {}

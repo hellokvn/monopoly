@@ -8,3 +8,7 @@ export function saveGame(game: Document<Game>, player?: Player): Promise<Game> {
 
   return game.save();
 }
+
+export function isSet(value: number): boolean {
+  return (value && value >= 0) || value !== null || value !== undefined;
+}

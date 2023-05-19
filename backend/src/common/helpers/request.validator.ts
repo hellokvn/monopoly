@@ -18,22 +18,3 @@ export function getClient<T>(args: T): Socket | undefined {
 
   return client;
 }
-
-export function getMessage<T>(args: T): T | undefined {
-  let isSearching: boolean = true;
-  let index: number = 0;
-  let message: T | any | undefined = undefined;
-
-  do {
-    message = args[index];
-    index = index + 1;
-
-    if (message && message.gameId) {
-      isSearching = false;
-    } else {
-      message = undefined;
-    }
-  } while (isSearching && index < 4);
-
-  return message;
-}

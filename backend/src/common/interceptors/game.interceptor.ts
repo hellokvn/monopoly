@@ -15,7 +15,7 @@ export class GameInterceptor implements NestInterceptor {
   }
 }
 
-function emitMessage(client: Socket, _?: unknown) {
+function emitMessage(client: Socket, responseData?: unknown) {
   console.log(client.game);
-  client.emit('update', client.game);
+  client.to(client.game._id.toString()).emit('update', client.game);
 }

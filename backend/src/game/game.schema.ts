@@ -1,4 +1,4 @@
-import { Dice } from '@monopoly/sdk';
+import { ALL_FIELDS, Bonus, Dice, FAMILY_STREET_IDS, FieldFamily, PlayerBonus } from '@monopoly/sdk';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, ObjectId } from 'mongoose';
 
@@ -33,6 +33,37 @@ export enum PlayerStatus {
   Disconnected = 'disconnected',
 }
 
+export class GameField {
+  public index: number;
+  public houses: number = 0;
+  public ownedByPlayerIndex: number | null;
+  public hasFullStreet: boolean = false;
+
+  constructor(index: number) {
+    this.index = index;
+  }
+
+  public get canAddHouse(): boolean {
+    return this.houses >= 0 || this.houses < 5;
+  }
+
+  public get canRemoveHouse(): boolean {
+    return this.houses > 0;
+  }
+
+  public get isPledged(): boolean {
+    return this.houses === -1;
+  }
+}
+
+function getFields(): GameField[] {
+  const fields: GameField[] = [];
+
+  ALL_FIELDS.forEach((field, index) => fields.push(new GameField(index)));
+
+  return fields;
+}
+
 export class Player {
   public id: ObjectId;
   public index: number;
@@ -45,19 +76,41 @@ export class Player {
   public previousPositionIndex: number = 0;
   public currentPositionIndex: number = 0;
   public canDiceCount = 0;
-  public diceCount = 0;
+  public diceCounter = 0;
   public afkCount = 0;
-  public bonuses = [0, 0, 0];
+  public bonuses: PlayerBonus = { [Bonus.Estate]: false, [Bonus.Gold]: false, [Bonus.JailFree]: false };
   public orderDice = 0;
+  public isJailed = false;
 
   public move(dice: Dice): void {
     if (dice.isSame) {
-      this.diceCount = this.diceCount + 1;
+      this.diceCounter = this.diceCounter + 1;
+
+      if (this.diceCounter >= 3) {
+        this.isJailed = true;
+        this.currentPositionIndex = 12;
+      } else {
+        this.currentPositionIndex = this.currentPositionIndex + dice.total;
+
+        return;
+      }
     } else {
       this.canDiceCount = 0;
     }
 
     this.currentPositionIndex = this.currentPositionIndex + dice.total;
+  }
+
+  public canPay(value: number): boolean {
+    return this.money - value >= 0;
+  }
+
+  public increaseMoney(value: number): void {
+    this.money = this.money + value;
+  }
+
+  public decreaseMoney(value: number): void {
+    this.money = this.money - value;
   }
 }
 
@@ -93,10 +146,24 @@ export class Game {
   @Prop({ required: true, default: [] })
   public order: number[];
 
+  @Prop({ required: true, default: getFields() })
+  public fields: GameField[];
+
   public logs: string[] = [];
 
-  public getCurrentPlayer(): Player {
-    return this.players[this.currentPlayerIndex];
+  public hasFullStreet(player: Player, family: FieldFamily): boolean {
+    const familyFields: number[] = FAMILY_STREET_IDS[family];
+    let hasFullStreet: boolean = true;
+
+    familyFields.forEach((index) => {
+      const { ownedByPlayerIndex } = this.fields[index];
+
+      if (ownedByPlayerIndex === player.index) {
+        hasFullStreet = false;
+      }
+    });
+
+    return hasFullStreet;
   }
 }
 
