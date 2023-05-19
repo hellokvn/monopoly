@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@monopoly/sdk": "workspace:*",
     "@nestjs/common": "^9.4.1",
     "@nestjs/config": "^2.3.2",
     "@nestjs/core": "^9.4.1",
@@ -28,8 +29,9 @@
     "@nestjs/platform-express": "^9.4.1",
     "@nestjs/platform-socket.io": "^9.4.1",
     "@nestjs/platform-ws": "^9.4.1",
+    "@nestjs/schedule": "^2.2.2",
+    "@nestjs/throttler": "^4.0.0",
     "@nestjs/websockets": "^9.4.1",
-    "@monopoly/sdk": "workspace:*",
     "mongoose": "^7.1.1",
     "random-int": "^3.0.0",
     "reflect-metadata": "^0.1.13",
@@ -40,6 +42,7 @@
     "@nestjs/cli": "^9.5.0",
     "@nestjs/schematics": "^9.2.0",
     "@nestjs/testing": "^9.4.1",
+    "@types/cron": "^2.0.1",
     "@types/express": "^4.17.17",
     "@types/jest": "28.1.8",
     "@types/node": "^16.18.31",
