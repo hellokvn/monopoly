@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
-import { saveGame } from '@/common/helpers/game.helper';
+import { GameHelper } from '@/game/game.helper';
 import { ALL_FIELDS, StreetField, StationField, STATION_IDS, FactoryField, FACTORY_IDS } from '@monopoly/sdk';
 import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class RentService {
+  @Inject(GameHelper)
+  private readonly gameHelper: GameHelper;
+
   public payRent({ game, player }: Socket): Promise<Game> {
     const field = ALL_FIELDS[game.currentFieldIndex];
     const fieldData = game.fields[game.currentFieldIndex];
@@ -69,6 +72,6 @@ export class RentService {
       rentToPay = ownedFactoriesByOwner < FACTORY_IDS.length ? ownedFieldsByPlayer * 150 : ownedFieldsByPlayer * 350;
     }
 
-    return saveGame(game, player);
+    return this.gameHelper.saveGame(game, [player]);
   }
 }

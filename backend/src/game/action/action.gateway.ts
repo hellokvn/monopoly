@@ -19,8 +19,8 @@ export class ActionGateway {
   @InjectModel(Game.name)
   private readonly model: Model<Game>;
 
-  @SubscribeMessage('action/create')
-  public async create(client: Socket): Promise<void> {
-    await this.service.create(client);
+  @SubscribeMessage('action')
+  public async action(client: Socket): Promise<void> {
+    await this.service.action(client);
   }
 }

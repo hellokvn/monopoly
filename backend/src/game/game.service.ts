@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game, GameStatus, Player } from './game.schema';
-import { saveGame } from '../common/helpers/game.helper';
-import { ALL_FIELDS, Dice, FACTORY_IDS, FactoryField, STATION_IDS, StationField, StreetField } from '@monopoly/sdk';
+import { GameHelper } from './game.helper';
 
 @Injectable()
 export class GameService {
   @InjectModel(Game.name)
   private readonly model: Model<Game>;
+
+  @Inject(GameHelper)
+  private readonly helper: GameHelper;
 
   public async create(client: Socket): Promise<void> {
     // TODO: Check if the creator player has an active room already.
@@ -43,12 +45,12 @@ export class GameService {
     game.players.push(player);
 
     // TODO: For tests
-    if (game.players.length >= 1) {
+    if (game.players.length >= 2) {
       game.status = GameStatus.SetOrder;
     }
 
     client.join(`GAME-${client.game._id.toString()}`);
 
-    return saveGame(game);
+    return this.helper.saveGame(game);
   }
 }
