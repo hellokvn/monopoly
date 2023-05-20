@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MongooseConfigService } from './shared/mongodb/mongoose-config.service';
-import { GameModule } from './game/game.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { GameModule } from './game/game.module';
+import { MongooseConfigService } from './shared/mongodb/mongoose-config.service';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     MongooseModule.forRootAsync({
       useClass: MongooseConfigService,
     }),
+    EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     GameModule,
   ],
