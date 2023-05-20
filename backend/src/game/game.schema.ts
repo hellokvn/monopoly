@@ -143,6 +143,22 @@ export class Player {
   }
 }
 
+export class Auction {
+  public reference: 'buy' | 'death' | 'offer';
+  public startingPrice: number;
+  public price: number;
+  public priceSteps: number;
+  public fieldIndex: number;
+  public bidder: number[];
+  public offeredBy?: number;
+
+  constructor(startingPrice: number) {
+    this.bidder = [];
+    this.startingPrice = startingPrice;
+    this.price = startingPrice;
+  }
+}
+
 @Schema()
 export class Game {
   @Prop({ required: true })
@@ -177,6 +193,9 @@ export class Game {
 
   @Prop({ required: true, default: getFields() })
   public fields: GameField[];
+
+  @Prop()
+  public auction: Auction | null;
 
   public logs: string[] = [];
 
