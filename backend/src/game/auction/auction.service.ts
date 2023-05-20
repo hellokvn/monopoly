@@ -1,4 +1,4 @@
-import { ALL_FIELDS } from '@monopoly/sdk';
+import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
@@ -7,6 +7,7 @@ import { Socket } from 'socket.io';
 import { isSet } from 'util/types';
 import { GameHelper } from '../game.helper';
 import { Auction, Game } from '../game.schema';
+import { CreateAuctionByOfferDto } from './aucthion.dto';
 
 @Injectable()
 export class AuctionService {
@@ -27,7 +28,6 @@ export class AuctionService {
     const auction = new Auction(field.price / 5);
 
     auction.reference = 'buy';
-    auction.priceSteps = field.price / 10;
     auction.fieldIndex = field.index;
 
     game.auction = auction;
@@ -35,7 +35,34 @@ export class AuctionService {
     this.gameHelper.saveGame(game);
   }
 
-  public async offer({ game, player }: Socket): Promise<void> {}
+  public async createByOffer({ game, player }: Socket, { fieldIndex, startingPrice }: CreateAuctionByOfferDto): Promise<void> {
+    const field = ALL_FIELDS[fieldIndex];
+    const fieldData = game.fields[field.index];
+
+    if (fieldData.ownedByPlayerIndex !== player.index) {
+      throw new WsException('Player does not own this field.');
+    }
+
+    const familyFields: number[] = FAMILY_STREET_IDS[field.family];
+
+    familyFields.forEach((index) => {
+      const data = game.fields[index];
+
+      if (data.houses > 0) {
+        throw new WsException('Player has built houses on this family street.');
+      }
+    });
+
+    const auction = new Auction(startingPrice);
+
+    auction.reference = 'offer';
+    auction.priceSteps = auction.startingPrice / 10;
+    auction.fieldIndex = field.index;
+
+    game.auction = auction;
+
+    this.gameHelper.saveGame(game);
+  }
 
   public async bid({ game, player }: Socket): Promise<void> {
     const { auction } = game;

@@ -2,10 +2,11 @@ import { AllExceptionsFilter } from '@/common/filters/exception.filter';
 import { GameInterceptor } from '@/common/interceptors/game.interceptor';
 import { Inject, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
+import { CreateAuctionByOfferDto } from './aucthion.dto';
 import { AuctionService } from './auction.service';
 
 @WebSocketGateway({ namespace: 'game' })
@@ -25,8 +26,8 @@ export class AuctionGateway {
   }
 
   @SubscribeMessage('auction/offer')
-  public async offer(client: Socket): Promise<void> {
-    await this.service.offer(client);
+  public async offer(@ConnectedSocket() client: Socket, @MessageBody() payload: CreateAuctionByOfferDto): Promise<void> {
+    await this.service.createByOffer(client, payload);
   }
 
   @SubscribeMessage('auction/bid')

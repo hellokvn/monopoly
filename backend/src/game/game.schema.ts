@@ -156,6 +156,7 @@ export class Auction {
     this.bidder = [];
     this.startingPrice = startingPrice;
     this.price = startingPrice;
+    this.priceSteps = this.startingPrice / 10;
   }
 }
 
