@@ -1,12 +1,10 @@
+import { GameHelper } from '@/game/game.helper';
+import { ALL_FIELDS, FAMILY_STREET_IDS, StreetField } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
 import { FieldDto } from './field.dto';
-import { ALL_FIELDS, FAMILY_STREET_IDS, StreetField } from '@monopoly/sdk';
-import { WsException } from '@nestjs/websockets';
-import { GameHelper } from '@/game/game.helper';
 
 @Injectable()
 export class FieldService {
@@ -49,7 +47,7 @@ export class FieldService {
 
     game.logs.push(`${player.name} adds a house on ${field.name}.`);
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 
   public async remove({ game, player }: Socket, { fieldIndex }: FieldDto): Promise<Game> {
@@ -68,7 +66,7 @@ export class FieldService {
 
     game.logs.push(`${player.name} removes a house on ${field.name}.`);
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 
   public async pledge({ game, player }: Socket, { fieldIndex }: FieldDto): Promise<Game> {
@@ -95,7 +93,7 @@ export class FieldService {
 
     game.logs.push(`${player.name} pledges ${field.name}.`);
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 
   public async unpledge({ game, player }: Socket, { fieldIndex }: FieldDto): Promise<Game> {
@@ -115,6 +113,6 @@ export class FieldService {
 
     game.logs.push(`${player.name} unpledges ${field.name}.`);
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 }

@@ -1,9 +1,9 @@
+import { GameHelper } from '@/game/game.helper';
+import { ALL_FIELDS, FACTORY_IDS, FactoryField, STATION_IDS, StationField, StreetField } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
-import { GameHelper } from '@/game/game.helper';
-import { ALL_FIELDS, StreetField, StationField, STATION_IDS, FactoryField, FACTORY_IDS } from '@monopoly/sdk';
-import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class RentService {
@@ -72,6 +72,6 @@ export class RentService {
       rentToPay = ownedFactoriesByOwner < FACTORY_IDS.length ? ownedFieldsByPlayer * 150 : ownedFieldsByPlayer * 350;
     }
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 }

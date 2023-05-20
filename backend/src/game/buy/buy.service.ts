@@ -1,9 +1,9 @@
+import { isSet } from '@/common/helpers';
+import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { Game } from '../game.schema';
-import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
 import { GameHelper } from '../game.helper';
-import { isSet } from '@/common/helpers';
+import { Game } from '../game.schema';
 
 @Injectable()
 export class BuyService {
@@ -18,7 +18,7 @@ export class BuyService {
     if (isBuyable) {
       game.currentPlayerIndex = 1;
 
-      return this.gameHelper.saveGame(game, [player]);
+      return this.gameHelper.saveGame(game, { player });
     }
 
     const canPay = player.canPay(field.price);
@@ -44,6 +44,6 @@ export class BuyService {
       });
     }
 
-    return this.gameHelper.saveGame(game, [player]);
+    return this.gameHelper.saveGame(game, { player });
   }
 }

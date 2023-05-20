@@ -1,23 +1,31 @@
-import { Game, Player, PlayerStatus } from '@/game/game.schema';
 import { Document } from '@/common/types/mongoose.type';
+import { Game, Player, PlayerStatus } from '@/game/game.schema';
+import { BaseEvent } from '@monopoly/sdk';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
-interface SaveGameOptions {
+interface SaveGameOptions<T extends BaseEvent> {
+  event?: T;
+  player?: Player;
+  players?: Player[];
   setNextPlayer?: boolean;
 }
 
 @Injectable()
 export class GameHelper {
-  @InjectModel(Game.name)
-  private readonly model: Model<Game>;
+  private readonly eventEmitter: EventEmitter2;
 
-  public saveGame(game: Document<Game>, players: Player[] = [], opts: SaveGameOptions = {}): Promise<Game> {
-    if (players && players.length) {
-      players.forEach((player) => {
+  constructor(eventEmitter: EventEmitter2) {
+    this.eventEmitter = eventEmitter;
+  }
+
+  public saveGame<T extends BaseEvent>(game: Document<Game>, opts: SaveGameOptions<T> = {}): Promise<Game> {
+    if (opts.players && opts.players.length) {
+      opts.players.forEach((player) => {
         game.players[player.index] = player;
       });
+    } else if (opts.player) {
+      game.players[opts.player.index] = opts.player;
     }
 
     if (opts.setNextPlayer) {
@@ -39,6 +47,10 @@ export class GameHelper {
       console.log({ nextPlayer: nextPlayerIndex });
     }
 
+    if (opts.event) {
+      this.eventEmitter.emit('order.created', opts.event);
+    }
+
     return game.save();
   }
 
@@ -58,7 +70,7 @@ export class GameHelper {
       }
     } else {
       if (value === 12 && player.currentPositionIndex === 12) {
-        return this.saveGame(game, [player]);
+        return this.saveGame(game, { player });
       } else {
         player.setPosition(value);
       }

@@ -1,5 +1,6 @@
 import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
 import { Model } from 'mongoose';
@@ -8,6 +9,7 @@ import { isSet } from 'util/types';
 import { GameHelper } from '../game.helper';
 import { Auction, Game } from '../game.schema';
 import { CreateAuctionByOfferDto } from './auction.dto';
+import { AuctionCreatedEvent } from './auction.event';
 
 @Injectable()
 export class AuctionService {
@@ -16,6 +18,12 @@ export class AuctionService {
 
   @Inject(GameHelper)
   private readonly gameHelper: GameHelper;
+
+  private readonly eventEmitter: EventEmitter2;
+
+  constructor(eventEmitter: EventEmitter2) {
+    this.eventEmitter = eventEmitter;
+  }
 
   public async createByNotBuying({ game, player }: Socket): Promise<void> {
     const field = ALL_FIELDS[player.currentPositionIndex];
@@ -32,7 +40,9 @@ export class AuctionService {
 
     game.auction = auction;
 
-    this.gameHelper.saveGame(game);
+    const event = new AuctionCreatedEvent(game.id, auction);
+
+    this.gameHelper.saveGame(game, { event });
   }
 
   public async createByOffer({ game, player }: Socket, { fieldIndex, startingPrice }: CreateAuctionByOfferDto): Promise<void> {
