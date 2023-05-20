@@ -85,6 +85,8 @@ export const GetGameAndValidatePlayer =
 
       const playerIndex = game.players.findIndex(({ clientId }) => clientId === client.id);
 
+      console.log({ playerIndex, clientId: client.id });
+
       if (playerIndex === -1) {
         throw new WsException('No player found.');
       }
