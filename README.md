@@ -9,3 +9,4 @@
 - using Websockets streams (Socket.io)
 - aiming desktop, potentially adding mobile later
 - using MongoDB
+- using domain driven design

@@ -68,6 +68,9 @@ importers:
       '@nestjs/core':
         specifier: ^9.4.1
         version: 9.4.1(@nestjs/common@9.4.1)(@nestjs/platform-express@9.4.1)(@nestjs/websockets@9.4.1)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      '@nestjs/event-emitter':
+        specifier: ^1.4.1
+        version: 1.4.1(@nestjs/common@9.4.1)(@nestjs/core@9.4.1)(reflect-metadata@0.1.13)
       '@nestjs/mongoose':
         specifier: ^9.2.2
         version: 9.2.2(@nestjs/common@9.4.1)(@nestjs/core@9.4.1)(mongoose@7.1.1)(reflect-metadata@0.1.13)(rxjs@7.8.1)
@@ -2087,6 +2090,19 @@ packages:
       uid: 2.0.2
     transitivePeerDependencies:
       - encoding
+
+  /@nestjs/event-emitter@1.4.1(@nestjs/common@9.4.1)(@nestjs/core@9.4.1)(reflect-metadata@0.1.13):
+    resolution: {integrity: sha512-PmLpzMYgEKJNxOUrRjb6kNSm2PC6J+BeLTuF/bkYViGM/mVGvYOgU5jq8DQnXmiSmDmyWN+tO2cHSnR7odJJRA==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0
+      '@nestjs/core': ^7.0.0 || ^8.0.0 || ^9.0.0
+      reflect-metadata: ^0.1.12
+    dependencies:
+      '@nestjs/common': 9.4.1(class-transformer@0.5.1)(class-validator@0.14.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      '@nestjs/core': 9.4.1(@nestjs/common@9.4.1)(@nestjs/platform-express@9.4.1)(@nestjs/websockets@9.4.1)(reflect-metadata@0.1.13)(rxjs@7.8.1)
+      eventemitter2: 6.4.9
+      reflect-metadata: 0.1.13
+    dev: false
 
   /@nestjs/mongoose@9.2.2(@nestjs/common@9.4.1)(@nestjs/core@9.4.1)(mongoose@7.1.1)(reflect-metadata@0.1.13)(rxjs@7.8.1):
     resolution: {integrity: sha512-szNuSUCwwbQSSeiTh8+tZ9fHV4nuzHwBDROb0hX0s7crwY15TunCfwyKbB2XjqkEQWUAasDeCBuKOJSL9N6tTg==}
@@ -5750,6 +5766,10 @@ packages:
     resolution: {integrity: sha512-z7IyloorXvKbFx9Bpie2+vMJKKx1fH1EN5yiTfp8CiLOTptSYy1g8H4yDpGlEdshL1PBiFtBHepF2cNsqeEeFQ==}
     engines: {node: '>=4.0.0'}
     dev: true
+
+  /eventemitter2@6.4.9:
+    resolution: {integrity: sha512-JEPTiaOt9f04oa6NOkc4aH+nVp5I3wEjpHbIPqfgCdD5v5bUzy7xQqwcVO2aDQgOWhI28da57HksMrzK9HlRxg==}
+    dev: false
 
   /eventemitter3@4.0.7:
     resolution: {integrity: sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==}
