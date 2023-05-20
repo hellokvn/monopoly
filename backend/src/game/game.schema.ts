@@ -112,6 +112,35 @@ export class Player {
   public decreaseMoney(value: number): void {
     this.money = this.money - value;
   }
+
+  public getPercentOfMoney(percent: number) {
+    return Math.trunc((this.money * percent) / 100);
+  }
+
+  public increasePosition(value: number) {
+    let newPosition = this.currentPositionIndex + value;
+
+    if (newPosition > ALL_FIELDS.length) {
+      newPosition = newPosition - (ALL_FIELDS.length + 1);
+    }
+
+    this.setPosition(newPosition);
+  }
+
+  public decreasePosition(value: number) {
+    let newPosition = this.currentPositionIndex - value;
+
+    if (newPosition < 0) {
+      newPosition = ALL_FIELDS.length + 1 + newPosition;
+    }
+
+    this.setPosition(newPosition);
+  }
+
+  public setPosition(position: number) {
+    this.previousPositionIndex = this.currentPositionIndex;
+    this.currentPositionIndex = position;
+  }
 }
 
 @Schema()
