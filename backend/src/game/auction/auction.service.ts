@@ -40,7 +40,7 @@ export class AuctionService {
 
     game.auction = auction;
 
-    const event = new AuctionCreatedEvent(game.id, auction);
+    const event = { name: AuctionCreatedEvent.name, event: new AuctionCreatedEvent(game.id, auction) };
 
     this.gameHelper.saveGame(game, { event });
   }

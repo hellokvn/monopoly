@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 interface SaveGameOptions<T extends BaseEvent> {
-  event?: T;
+  event?: { name: string; event: T };
   player?: Player;
   players?: Player[];
   setNextPlayer?: boolean;
@@ -48,7 +48,7 @@ export class GameHelper {
     }
 
     if (opts.event) {
-      this.eventEmitter.emit('order.created', opts.event);
+      this.eventEmitter.emit('auction.created', opts.event);
     }
 
     return game.save();
