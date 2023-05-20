@@ -7,7 +7,7 @@ import { Socket } from 'socket.io';
 import { isSet } from 'util/types';
 import { GameHelper } from '../game.helper';
 import { Auction, Game } from '../game.schema';
-import { CreateAuctionByOfferDto } from './aucthion.dto';
+import { CreateAuctionByOfferDto } from './auction.dto';
 
 @Injectable()
 export class AuctionService {

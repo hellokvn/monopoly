@@ -6,7 +6,7 @@ import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
-import { CreateAuctionByOfferDto } from './aucthion.dto';
+import { CreateAuctionByOfferDto } from './auction.dto';
 import { AuctionService } from './auction.service';
 
 @WebSocketGateway({ namespace: 'game' })
