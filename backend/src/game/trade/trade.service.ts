@@ -67,8 +67,8 @@ export class TradeService {
     }
 
     if (trade.takeMoney > 0) {
-      targetPlayer.decreaseMoney(trade.takeMoney);
       player.increaseMoney(trade.takeMoney);
+      targetPlayer.decreaseMoney(trade.takeMoney);
     }
 
     trade.giveFields.forEach((fieldIndex) => {

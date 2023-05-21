@@ -1,8 +1,8 @@
+import { Bonus } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { Game } from '../game.schema';
-import { Bonus } from '@monopoly/sdk';
 import { GameHelper } from '../game.helper';
+import { Game } from '../game.schema';
 
 @Injectable()
 export class ActionService {
@@ -23,7 +23,7 @@ export class ActionService {
         const tax = player.getPercentOfMoney(15);
 
         player.decreaseMoney(tax);
-        game.bankAmount = game.bankAmount + tax / 2;
+        game.increaseBankAmount(tax / 2);
         game.logs.push(`${player.name} pays ${tax} Gold for tax.`);
         break;
 
@@ -39,7 +39,7 @@ export class ActionService {
 
         game.logs.push(`${player.name} receives ${game.bankAmount} Gold from bank.`);
         player.increaseMoney(game.bankAmount);
-        game.bankAmount = 0;
+        game.setBankAmount(0);
         break;
 
       case 22:

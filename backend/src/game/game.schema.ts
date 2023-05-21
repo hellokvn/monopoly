@@ -1,6 +1,7 @@
 import { ALL_FIELDS, Bonus, Dice, FAMILY_STREET_IDS, FieldFamily, PlayerBonus } from '@monopoly/sdk';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, ObjectId } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
+import { GAME_DEFAULT_MONEY, GAME_STARTING_FIELD } from './game.constants';
 
 export type GameDocument = HydratedDocument<Game>;
 
@@ -51,8 +52,56 @@ export class GameField {
     return this.houses > 0;
   }
 
+  public get canPledge(): boolean {
+    return this.houses === 0;
+  }
+
+  public get canUnpledge(): boolean {
+    return this.houses === -1;
+  }
+
   public get isPledged(): boolean {
     return this.houses === -1;
+  }
+
+  public addHouse(): boolean {
+    if (!this.canAddHouse) {
+      return false;
+    }
+
+    this.houses = this.houses + 1;
+
+    return true;
+  }
+
+  public removeHouse(): boolean {
+    if (!this.canRemoveHouse) {
+      return false;
+    }
+
+    this.houses = this.houses - 1;
+
+    return true;
+  }
+
+  public pledge(): boolean {
+    if (!this.canPledge) {
+      return false;
+    }
+
+    this.houses = -1;
+
+    return true;
+  }
+
+  public unpledge(): boolean {
+    if (!this.canUnpledge) {
+      return false;
+    }
+
+    this.houses = 0;
+
+    return true;
   }
 }
 
@@ -64,23 +113,59 @@ function getFields(): GameField[] {
   return fields;
 }
 
+export enum PlayerDeptsType {
+  Bank = 'bank',
+  Player = 'player',
+}
+
+export class PlayerDepts {
+  public amount: number;
+  public type?: PlayerDeptsType;
+  public targetPlayerIndex?: number;
+
+  constructor() {
+    this.reset();
+  }
+
+  public reset(): void {
+    this.amount = 0;
+    this.type = null;
+    this.targetPlayerIndex = null;
+  }
+}
+
 export class Player {
-  public id: ObjectId;
   public index: number;
   public clientId: string;
-  public isBot: boolean = false;
+  public isBot: boolean;
   public name: string;
   public color: PlayerColor;
-  public status: PlayerStatus = PlayerStatus.Alive;
-  public money = 15000;
-  public previousPositionIndex: number = 0;
-  public currentPositionIndex: number = 0;
-  public canDiceCount = 0;
-  public diceCounter = 0;
-  public afkCount = 0;
-  public bonuses: PlayerBonus = { [Bonus.Estate]: false, [Bonus.Gold]: false, [Bonus.JailFree]: false };
-  public orderDice = 0;
-  public isJailed = false;
+  public status: PlayerStatus;
+  public money: number;
+  public previousPositionIndex: number;
+  public currentPositionIndex: number;
+  public canDiceCount: number;
+  public diceCounter: number;
+  public afkCount: number;
+  public bonuses: PlayerBonus;
+  public orderDice: number;
+  public isJailed: boolean;
+  public depts: PlayerDepts;
+
+  constructor() {
+    this.isBot = false;
+    this.money = GAME_DEFAULT_MONEY;
+    this.status = PlayerStatus.Alive;
+    this.previousPositionIndex = GAME_STARTING_FIELD;
+    this.currentPositionIndex = GAME_STARTING_FIELD;
+    this.canDiceCount = 0;
+    this.diceCounter = 0;
+    this.afkCount = 0;
+    this.orderDice = 0;
+    this.depts = new PlayerDepts();
+    this.isJailed = false;
+    this.bonuses = { [Bonus.Estate]: false, [Bonus.Gold]: false, [Bonus.JailFree]: false };
+  }
 
   public move(dice: Dice): void {
     if (dice.isSame) {
@@ -99,6 +184,10 @@ export class Player {
     }
 
     this.currentPositionIndex = this.currentPositionIndex + dice.total;
+  }
+
+  public get canPayDepts(): boolean {
+    return this.money >= this.depts.amount;
   }
 
   public canPay(value: number): boolean {
@@ -222,6 +311,45 @@ export class Game {
     });
 
     return hasFullStreet;
+  }
+
+  public increaseBankAmount(value: number): void {
+    this.bankAmount = this.bankAmount + value;
+  }
+
+  public setBankAmount(value: number): void {
+    this.bankAmount = value;
+  }
+
+  public getFieldsByPlayer(playerIndex: number): GameField[] {
+    return this.fields.filter(({ ownedByPlayerIndex }) => ownedByPlayerIndex === playerIndex);
+  }
+
+  public getBuiltFieldsByPlayer(playerIndex: number): GameField[] {
+    return this.fields.filter(({ ownedByPlayerIndex, houses }) => ownedByPlayerIndex === playerIndex && houses > 0);
+  }
+
+  public getPledgeableFieldsByPlayer(playerIndex: number): GameField[] {
+    const fields = this.fields.filter(({ ownedByPlayerIndex, houses }) => ownedByPlayerIndex === playerIndex && houses === 0);
+    const results: GameField[] = [];
+
+    fields.forEach((data) => {
+      const field = ALL_FIELDS[data.index];
+      const familyStreets = FAMILY_STREET_IDS[field.family];
+      let canPledge = true;
+
+      familyStreets.forEach((familyFieldIndex) => {
+        if (this.fields[familyFieldIndex].houses === 0) {
+          canPledge = false;
+        }
+      });
+
+      if (canPledge) {
+        results.push(data);
+      }
+    });
+
+    return fields;
   }
 }
 

@@ -72,6 +72,8 @@ export class RentService {
       rentToPay = ownedFactoriesByOwner < FACTORY_IDS.length ? ownedFieldsByPlayer * 150 : ownedFieldsByPlayer * 350;
     }
 
+    // TODO: Set rentToPay
+
     return this.gameHelper.saveGame(game, { player });
   }
 }

@@ -13,4 +13,8 @@ export class StreetField extends Field {
     this.price = street.members[streetIndex].price;
     this.rentMatrix = street.members[streetIndex].rentMatrix;
   }
+
+  public get downgradePrice(): number {
+    return (this.upgradePrice * 80) / 100;
+  }
 }

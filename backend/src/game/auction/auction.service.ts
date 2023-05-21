@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { isSet } from 'util/types';
 import { GameHelper } from '../game.helper';
-import { Auction, Game } from '../game.schema';
+import { Auction, AuctionType, Game } from '../game.schema';
 import { CreateAuctionByOfferDto } from './auction.dto';
 import { AuctionCreatedEvent } from './auction.event';
 
@@ -29,13 +29,15 @@ export class AuctionService {
     const field = ALL_FIELDS[player.currentPositionIndex];
     const fieldData = game.fields[field.index];
 
-    if (!field.isBuyable || isSet(fieldData.ownedByPlayerIndex)) {
+    if (game.auction) {
+      throw new WsException('There is already an open auction.');
+    } else if (!field.isBuyable || isSet(fieldData.ownedByPlayerIndex)) {
       throw new WsException('Field is not meant for auction.');
     }
 
     const auction = new Auction(field.price / 5);
 
-    auction.reference = 'buy';
+    auction.type = AuctionType.Buy;
     auction.fieldIndex = field.index;
 
     game.auction = auction;
@@ -49,7 +51,9 @@ export class AuctionService {
     const field = ALL_FIELDS[fieldIndex];
     const fieldData = game.fields[field.index];
 
-    if (fieldData.ownedByPlayerIndex !== player.index) {
+    if (game.auction) {
+      throw new WsException('There is already an open auction.');
+    } else if (fieldData.ownedByPlayerIndex !== player.index) {
       throw new WsException('Player does not own this field.');
     }
 
@@ -65,13 +69,37 @@ export class AuctionService {
 
     const auction = new Auction(startingPrice);
 
-    auction.reference = 'offer';
+    auction.type = AuctionType.Offer;
     auction.priceSteps = auction.startingPrice / 10;
     auction.fieldIndex = field.index;
 
     game.auction = auction;
 
     this.gameHelper.saveGame(game);
+  }
+
+  public async createByDeath({ game, player }: Socket): Promise<Game> {
+    const fields = game.fields.filter(({ ownedByPlayerIndex }) => ownedByPlayerIndex === player.index);
+
+    fields.forEach((data) => {
+      const field = ALL_FIELDS[data.index];
+      const auction = new Auction(field.price);
+
+      auction.type = AuctionType.Death;
+      auction.priceSteps = auction.startingPrice / 10;
+      auction.fieldIndex = field.index;
+
+      game.auctionWaitlist.push(auction);
+    });
+
+    if (!game.auctionWaitlist || !game.auctionWaitlist.length) {
+      this.gameHelper.saveGame(game);
+      return;
+    }
+
+    game.auction = game.auctionWaitlist.shift();
+
+    return this.gameHelper.saveGame(game);
   }
 
   public async bid({ game, player }: Socket): Promise<void> {
@@ -100,5 +128,37 @@ export class AuctionService {
     this.gameHelper.saveGame(game);
   }
 
-  public async ends({ game }: Socket): Promise<void> {}
+  public async ends({ game }: Socket): Promise<void> {
+    const { auction } = game;
+    const field = ALL_FIELDS[auction.fieldIndex];
+    const fieldData = game.fields[field.index];
+
+    if (auction.bidder && auction.bidder.length) {
+      const winnerPlayerIndex = auction.bidder[auction.bidder.length - 1];
+      const winner = game.players[winnerPlayerIndex];
+      const owner = game.players[fieldData.ownedByPlayerIndex];
+
+      // TODO: do-while based on if winner can pay eventually
+
+      winner.decreaseMoney(auction.price);
+
+      if (auction.type === AuctionType.Offer) {
+        owner.increaseMoney(auction.price);
+      } else if (auction.type === AuctionType.Death) {
+        game.increaseBankAmount(auction.price / 2);
+      }
+
+      winner.decreaseMoney(auction.price);
+      fieldData.ownedByPlayerIndex = winner.index;
+    }
+
+    if (!game.auctionWaitlist || !game.auctionWaitlist.length) {
+      this.gameHelper.saveGame(game);
+      return;
+    }
+
+    game.auction = game.auctionWaitlist.shift();
+
+    this.gameHelper.saveGame(game);
+  }
 }
