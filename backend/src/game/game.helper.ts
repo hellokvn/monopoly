@@ -21,9 +21,7 @@ export class GameHelper {
 
   public saveGame<T extends BaseEvent>(game: Document<Game>, opts: SaveGameOptions<T> = {}): Promise<Game> {
     if (opts.players && opts.players.length) {
-      opts.players.forEach((player) => {
-        game.players[player.index] = player;
-      });
+      opts.players.forEach((player) => (game.players[player.index] = player));
     } else if (opts.player) {
       game.players[opts.player.index] = opts.player;
     }

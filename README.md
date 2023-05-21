@@ -10,3 +10,4 @@
 - aiming desktop, potentially adding mobile later
 - using MongoDB
 - using domain driven design
+- meeting Airbnb styleguide

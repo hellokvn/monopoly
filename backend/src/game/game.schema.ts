@@ -143,8 +143,14 @@ export class Player {
   }
 }
 
+export enum AuctionType {
+  Buy = 'buy',
+  Death = 'death',
+  Offer = 'offer',
+}
+
 export class Auction {
-  public reference: 'buy' | 'death' | 'offer';
+  public type: AuctionType;
   public startingPrice: number;
   public price: number;
   public priceSteps: number;
@@ -197,6 +203,9 @@ export class Game {
 
   @Prop()
   public auction: Auction | null;
+
+  @Prop()
+  public auctionWaitlist: Auction[];
 
   public logs: string[] = [];
 

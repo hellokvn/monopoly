@@ -20,7 +20,7 @@ export class FieldService {
     } else if (!(field instanceof StreetField)) {
       throw new WsException('Can not build here.');
     } else if (!player.canPay(field.upgradePrice)) {
-      throw new WsException('Not enough money');
+      throw new WsException('Not enough money.');
     }
 
     const familyFields: number[] = FAMILY_STREET_IDS[field.family];
