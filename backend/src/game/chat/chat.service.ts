@@ -14,6 +14,6 @@ export class ChatService {
     console.log('ChatService/add');
     const { game, player } = client;
 
-    client.emit('chat', { message, from: player.name, color: player.color });
+    client.to(game._id.toString()).emit('chat', { message, from: player.name });
   }
 }
