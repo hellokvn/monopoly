@@ -4,15 +4,15 @@ import { FactoryField } from './factory';
 import { FieldFamily } from './field.enum';
 import { StationField } from './station';
 import {
-  StreetField,
+  STREET_BLUE,
+  STREET_GREEN,
   STREET_GREY,
   STREET_ORANGE,
-  STREET_YELLOW,
-  STREET_GREEN,
   STREET_PURPLE,
-  STREET_WHITE,
-  STREET_BLUE,
   STREET_RED,
+  STREET_WHITE,
+  STREET_YELLOW,
+  StreetField,
 } from './street';
 
 export const ALL_FIELDS: Field[] = [
@@ -65,7 +65,7 @@ export const STATION_IDS = getGenericFieldIds(StationField);
 export const FACTORY_IDS = getGenericFieldIds(FactoryField);
 export const ACTION_IDS = getGenericFieldIds(ActionField);
 
-export const FAMILY_STREET_IDS = {
+export const FAMILY_STREET_IDS: { [key: string]: number[] } = {
   [FieldFamily.StreetGrey]: getStreetIdsByFamily(FieldFamily.StreetGrey),
   [FieldFamily.StreetOrange]: getStreetIdsByFamily(FieldFamily.StreetOrange),
   [FieldFamily.StreetYellow]: getStreetIdsByFamily(FieldFamily.StreetYellow),

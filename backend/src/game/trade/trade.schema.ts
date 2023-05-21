@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Game } from '../game.schema';
-
-const ONE_MINUTE: number = 60000;
+import { TRADE_TIMER } from './trade.constants';
+import { TradeStatus } from './trade.enum';
 
 export type TradeDocument = HydratedDocument<Trade>;
 
@@ -10,6 +10,9 @@ export type TradeDocument = HydratedDocument<Trade>;
 export class Trade {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Game' })
   public readonly game: Game;
+
+  @Prop({ required: true, default: TradeStatus.Active })
+  public status: TradeStatus;
 
   @Prop({ required: true })
   public playerIndex: number;
@@ -32,7 +35,7 @@ export class Trade {
   @Prop({ default: new Date() })
   public readonly createdAt: Date;
 
-  @Prop({ default: new Date(new Date().getTime() + ONE_MINUTE) })
+  @Prop({ default: new Date(new Date().getTime() + TRADE_TIMER) })
   public readonly expiresAt: Date;
 
   constructor(game: Game) {
