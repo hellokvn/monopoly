@@ -1,12 +1,14 @@
+import { GAME_STARTED, GetGameAndValidatePlayer, PLAYER_ALIVE } from '@/common/decorators/game.decorator';
+import { AllExceptionsFilter } from '@/common/filters/exception.filter';
+import { GameInterceptor } from '@/common/interceptors/game.interceptor';
+import { Inject, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
-import { UseInterceptors, Inject, UsePipes, ValidationPipe, UseFilters } from '@nestjs/common';
+import { CreateTradeDto, TradeDto } from './trade.dto';
 import { TradeService } from './trade.service';
-import { AllExceptionsFilter } from '@/common/filters/exception.filter';
-import { GameInterceptor } from '@/common/interceptors/game.interceptor';
 
 @WebSocketGateway({ namespace: 'game' })
 @UseFilters(AllExceptionsFilter)
@@ -20,22 +22,26 @@ export class TradeGateway {
   private readonly model: Model<Game>;
 
   @SubscribeMessage('trade/create')
-  public async create(client: Socket): Promise<void> {
-    await this.service.create(client);
+  @GetGameAndValidatePlayer([GAME_STARTED, PLAYER_ALIVE])
+  public async create(@ConnectedSocket() client: Socket, @MessageBody() payload: CreateTradeDto): Promise<void> {
+    await this.service.create(client, payload);
   }
 
   @SubscribeMessage('trade/accept')
-  public async accept(client: Socket): Promise<void> {
-    await this.service.create(client);
+  @GetGameAndValidatePlayer([GAME_STARTED, PLAYER_ALIVE])
+  public async accept(client: Socket, @MessageBody() payload: TradeDto): Promise<void> {
+    await this.service.accept(client, payload);
   }
 
   @SubscribeMessage('trade/decline')
-  public async decline(client: Socket): Promise<void> {
-    await this.service.create(client);
+  @GetGameAndValidatePlayer([GAME_STARTED, PLAYER_ALIVE])
+  public async decline(client: Socket, @MessageBody() payload: TradeDto): Promise<void> {
+    await this.service.decline(client, payload);
   }
 
   @SubscribeMessage('trade/abort')
-  public async abort(client: Socket): Promise<void> {
-    await this.service.create(client);
+  @GetGameAndValidatePlayer([GAME_STARTED, PLAYER_ALIVE])
+  public async abort(client: Socket, @MessageBody() payload: TradeDto): Promise<void> {
+    await this.service.abort(client, payload);
   }
 }
