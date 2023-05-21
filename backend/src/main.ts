@@ -1,6 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { EventEmitter } from 'events';
+import { AppModule } from './app.module';
+
+EventEmitter.setMaxListeners(0);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,4 +13,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
+
 bootstrap();
