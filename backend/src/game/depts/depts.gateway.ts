@@ -1,12 +1,12 @@
+import { AllExceptionsFilter } from '@/common/filters/exception.filter';
+import { GameInterceptor } from '@/common/interceptors/game.interceptor';
+import { Inject, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { Game } from '../game.schema';
-import { UseInterceptors, Inject, UsePipes, ValidationPipe, UseFilters } from '@nestjs/common';
 import { DeptsService } from './depts.service';
-import { AllExceptionsFilter } from '@/common/filters/exception.filter';
-import { GameInterceptor } from '@/common/interceptors/game.interceptor';
 
 @WebSocketGateway({ namespace: 'game' })
 @UseFilters(AllExceptionsFilter)
@@ -21,11 +21,11 @@ export class DeptsGateway {
 
   @SubscribeMessage('depts/manual')
   public async manual(client: Socket): Promise<void> {
-    await this.service.create(client);
+    await this.service.manual(client);
   }
 
   @SubscribeMessage('depts/automatic')
   public async automatic(client: Socket): Promise<void> {
-    await this.service.create(client);
+    await this.service.automatic(client);
   }
 }
