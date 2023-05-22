@@ -22,22 +22,25 @@
   },
   "dependencies": {
     "@monopoly/sdk": "workspace:*",
+    "@nestjs-modules/ioredis": "^1.0.1",
     "@nestjs/common": "^9.4.1",
     "@nestjs/config": "^2.3.2",
     "@nestjs/core": "^9.4.1",
     "@nestjs/event-emitter": "^1.4.1",
-    "@nestjs/mongoose": "^9.2.2",
     "@nestjs/platform-express": "^9.4.1",
     "@nestjs/platform-socket.io": "^9.4.1",
     "@nestjs/platform-ws": "^9.4.1",
     "@nestjs/schedule": "^2.2.2",
     "@nestjs/throttler": "^4.0.0",
+    "@nestjs/typeorm": "^9.0.1",
     "@nestjs/websockets": "^9.4.1",
-    "mongoose": "^7.1.1",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.0",
     "random-int": "^3.0.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.16"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.5.0",

@@ -1,20 +1,37 @@
 version: '3.9'
 
 services:
-  mongodb:
-    container_name: mongodb
-    image: mongo:5.0
-    environment:
-      - MONGO_INITDB_DATABASE=${MONGODB_NAME}
+  redis:
+    container_name: redis_container
+    image: redis:7.0-alpine
+    restart: always
     ports:
-      - 27017:27017
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning
+    volumes: 
+      - redis_data:/data/redis
+
+  postgres:
+    container_name: postgres_container
+    image: postgres:15.3
+    environment:
+      POSTGRES_USER: ${PSQL_DB_USER}
+      POSTGRES_PASSWORD: ${PSQL_DB_PASS}
+      POSTGRES_DB: ${PSQL_DB_NAME}
+    ports:
+      - 5432:5432
     volumes:
-      - mongodb_data:/data/db
-    networks:
-      - monpoly_network
+      - postgres_data:/data/postgres
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${PSQL_DB_USER} -d ${PSQL_DB_NAME}']
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
 volumes:
-  mongodb_data:
+  redis_data:
+    driver: local
+  postgres_data:
     driver: local
 
 networks:
