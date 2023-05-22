@@ -1,9 +1,7 @@
-import { ObjectId } from 'mongoose';
-
 export class BaseEvent {
-  public readonly gameId: ObjectId;
+  public readonly gameId: string;
 
-  constructor(gameId: ObjectId) {
+  constructor(gameId: string) {
     this.gameId = gameId;
   }
 }
