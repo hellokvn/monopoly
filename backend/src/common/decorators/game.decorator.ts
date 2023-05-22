@@ -1,13 +1,43 @@
+import { Game, GameField, GameStatus, Player, PlayerDepts, PlayerStatus, Trade } from '@monopoly/sdk';
 import { WsException } from '@nestjs/websockets';
-import { Game, GameField, GameStatus, Player, PlayerStatus } from '../../game/game.schema';
 import { plainToClass } from 'class-transformer';
-import { Document } from '../types/mongoose.type';
+import { Redis } from 'ioredis';
 
 export const GAME_WAITING = 'game-waiting';
 export const GAME_SET_ORDER = 'game-set-order';
 export const GAME_STARTED = 'game-started';
 export const PLAYER_TURN = 'player-turn';
 export const PLAYER_ALIVE = 'player-alive';
+
+const redis = new Redis({
+  host: 'localhost',
+  port: 6379,
+});
+
+function mapDataToGame(data: string | unknown): Game {
+  if (typeof data === 'string') {
+    data = JSON.parse(data);
+  }
+
+  const game = plainToClass(Game, data);
+
+  // game.auction = plainToClass(Auction, game.auction) || null;
+
+  game.trades.forEach((trade, index) => {
+    game.trades[index] = plainToClass(Trade, trade);
+  });
+
+  game.fields.forEach((field, index) => {
+    game.fields[index] = plainToClass(GameField, field);
+  });
+
+  game.players.forEach((player, index) => {
+    game.players[index].depts = plainToClass(PlayerDepts, game.players[index].depts);
+    game.players[index] = plainToClass(Player, player);
+  });
+
+  return game;
+}
 
 type GamePermission = Array<typeof GAME_WAITING | typeof GAME_SET_ORDER | typeof GAME_STARTED | typeof PLAYER_TURN | typeof PLAYER_ALIVE>;
 
@@ -20,7 +50,7 @@ interface GameOpts {
 function getGameByRoom(rooms: Set<string>): string | undefined {
   for (const room of rooms) {
     if (room.includes('GAME-')) {
-      return room.replace('GAME-', '');
+      return room;
     }
   }
 }
@@ -36,7 +66,7 @@ export const GetGame =
 
       const client = arguments[0];
       const payload = arguments[1];
-      const game = await this.model.findById(payload.gameId).exec();
+      const game = mapDataToGame(await redis.get(payload.gameId));
 
       if (!game) {
         throw new WsException('No game found.');
@@ -58,6 +88,7 @@ export const GetGameAndValidatePlayer =
   (permissions: GamePermission = [], opts: GameOpts = {}) =>
   (target, key, descriptor) => {
     const originalFunction: any = descriptor.value;
+
     descriptor.value = async function (this: any) {
       if (!arguments || !arguments.length) {
         throw new WsException('No arguments found.');
@@ -67,7 +98,7 @@ export const GetGameAndValidatePlayer =
 
       const client = arguments[opts.clientIndex || 0];
       const gameId: string = getGameByRoom(client.rooms);
-      const game: Document<Game> = await this.model.findById(gameId).exec();
+      const game = mapDataToGame(await redis.get(gameId));
 
       if (!game) {
         throw new WsException('No game found.');

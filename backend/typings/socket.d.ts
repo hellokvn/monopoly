@@ -1,10 +1,9 @@
-import { Document } from 'src/common/types/mongoose.type';
-import { Game, Player } from 'src/game/game.schema';
+import { Game, Player } from '@monopoly/sdk';
 import 'socket.io';
 
 declare module 'socket.io' {
   interface Socket {
-    game: Document<Game>;
+    game: Game;
     player: Player;
   }
 }

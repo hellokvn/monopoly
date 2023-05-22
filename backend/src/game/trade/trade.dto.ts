@@ -1,7 +1,5 @@
-import { ALL_FIELDS } from '@monopoly/sdk';
+import { ALL_FIELDS, TRADE_MAXIMUM_FIELDS, TRADE_MINIMUM_MONEY } from '@monopoly/sdk';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsNumber, IsObject, Max, Min } from 'class-validator';
-import { ObjectId } from 'mongoose';
-import { TRADE_MAXIMUM_FIELDS, TRADE_MINIMUM_MONEY } from './trade.constants';
 
 export class CreateTradeDto {
   @IsNumber()
@@ -34,5 +32,5 @@ export class CreateTradeDto {
 
 export class TradeDto {
   @IsObject()
-  public tradeId: ObjectId;
+  public tradeId: string;
 }

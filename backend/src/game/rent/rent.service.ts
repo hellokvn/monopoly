@@ -1,9 +1,8 @@
 import { GameHelper } from '@/game/game.helper';
-import { ALL_FIELDS, FACTORY_IDS, FactoryField, STATION_IDS, StationField, StreetField } from '@monopoly/sdk';
+import { ALL_FIELDS, FACTORY_IDS, FactoryField, Game, STATION_IDS, StationField, StreetField } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { Game } from '../game.schema';
 
 @Injectable()
 export class RentService {
@@ -74,6 +73,6 @@ export class RentService {
 
     // TODO: Set rentToPay
 
-    return this.gameHelper.saveGame(game, { player });
+    return this.gameHelper.saveGame(game);
   }
 }

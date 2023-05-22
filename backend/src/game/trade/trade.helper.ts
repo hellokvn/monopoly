@@ -1,24 +1,9 @@
-import { Document } from '@/common/types/mongoose.type';
-import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
+import { ALL_FIELDS, FAMILY_STREET_IDS, Game, PlayerStatus, Trade } from '@monopoly/sdk';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
-import { Model, ObjectId } from 'mongoose';
-import { Game, Player, PlayerStatus } from '../game.schema';
-import { TradeStatus } from './trade.enum';
-import { Trade } from './trade.schema';
 
 @Injectable()
 export class TradeHelper {
-  @InjectModel(Trade.name)
-  private readonly model: Model<Trade>;
-
-  public findActiveTrade(id: ObjectId, game: Game, player: Player): Promise<Document<Trade>> {
-    const condition = { id, game, playerIndex: player.index, status: TradeStatus.Active };
-
-    return this.model.findOne(condition).exec();
-  }
-
   public validateTrade(game: Game, trade: Trade): void | never {
     const player = game.players[trade.playerIndex];
 

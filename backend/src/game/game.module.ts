@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ActionModule } from './action/action.module';
 import { AuctionModule } from './auction/auction.module';
 import { BuyModule } from './buy/buy.module';
@@ -10,26 +9,13 @@ import { FieldModule } from './field/field.module';
 import { GameGateway } from './game.gateway';
 import { GameHelper } from './game.helper';
 import { GameSchedule } from './game.schedule';
-import { Game, GameSchema } from './game.schema';
 import { GameService } from './game.service';
 import { JailModule } from './jail/jail.module';
 import { RentModule } from './rent/rent.module';
 import { TradeModule } from './trade/trade.module';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: Game.name, schema: GameSchema }]),
-    ActionModule,
-    AuctionModule,
-    BuyModule,
-    ChatModule,
-    DeptsModule,
-    DiceModule,
-    FieldModule,
-    JailModule,
-    RentModule,
-    TradeModule,
-  ],
+  imports: [ActionModule, AuctionModule, BuyModule, ChatModule, DeptsModule, DiceModule, FieldModule, JailModule, RentModule, TradeModule],
   providers: [GameGateway, GameService, GameSchedule, GameHelper],
   exports: [GameHelper],
 })

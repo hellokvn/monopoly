@@ -1,9 +1,8 @@
 import { isSet } from '@/common/helpers';
-import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
+import { ALL_FIELDS, Game } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game } from '../game.schema';
 
 @Injectable()
 export class BuyService {
@@ -18,7 +17,7 @@ export class BuyService {
     if (isBuyable) {
       game.currentPlayerIndex = 1;
 
-      return this.gameHelper.saveGame(game, { player });
+      return this.gameHelper.saveGame(game);
     }
 
     const canPay = player.canPay(field.price);
@@ -32,18 +31,18 @@ export class BuyService {
     fieldData.ownedByPlayerIndex = player.index;
     game.logs.push(`${player.name} buys ${field.name} for ${field.price} Gold.`);
 
-    const hasFullStreet = game.hasFullStreet(player, field.family);
+    // const hasFullStreet = game.hasFullStreet(player, field.family);
 
-    if (hasFullStreet) {
-      const familyFields: number[] = FAMILY_STREET_IDS[field.family];
+    // if (hasFullStreet) {
+    //   const familyFields: number[] = FAMILY_STREET_IDS[field.family];
 
-      familyFields.forEach((index) => {
-        const data = game.fields[index];
+    //   familyFields.forEach((index) => {
+    //     const data = game.fields[index];
 
-        data.hasFullStreet = true;
-      });
-    }
+    //     data.hasFullStreet = true;
+    //   });
+    // }
 
-    return this.gameHelper.saveGame(game, { player });
+    return this.gameHelper.saveGame(game);
   }
 }

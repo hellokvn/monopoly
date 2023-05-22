@@ -1,27 +1,36 @@
+import { Game, GameStatus, Player } from '@monopoly/sdk';
+import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
-import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
-import { Game, GameStatus, Player } from './game.schema';
 import { GameHelper } from './game.helper';
 
 @Injectable()
 export class GameService {
-  @InjectModel(Game.name)
-  private readonly model: Model<Game>;
+  @InjectRedis()
+  private readonly redis: Redis;
 
   @Inject(GameHelper)
   private readonly helper: GameHelper;
 
+  public async test(client: Socket): Promise<Game> {
+    const { game, player } = client;
+
+    player.name = 'Cool';
+
+    return this.helper.saveGame(game);
+  }
+
   public async create(client: Socket): Promise<void> {
     // TODO: Check if the creator player has an active room already.
 
-    const game = new this.model();
+    const game = new Game(client.id);
 
-    game.creatorClientId = client.id;
+    await this.redis.set(game.id, JSON.stringify(game));
 
-    client.game = await game.save();
+    console.log(game.id);
+
+    client.game = game;
   }
 
   public async join(client: Socket): Promise<Game | never> {
@@ -37,8 +46,10 @@ export class GameService {
       throw new WsException('Player already joined this game.');
     }
 
-    const player = new Player();
-    player.index = game.players.length;
+    const player = new Player(game.players.length);
+
+    // TODO: Set userId (psql/auth)
+
     player.clientId = client.id;
     player.name = `Player ${player.index}`;
 
@@ -49,7 +60,7 @@ export class GameService {
       game.status = GameStatus.SetOrder;
     }
 
-    client.join(`GAME-${client.game._id.toString()}`);
+    client.join(client.game.id);
 
     return this.helper.saveGame(game);
   }

@@ -1,14 +1,11 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Model } from 'mongoose';
-import { Socket } from 'socket.io';
-import { Game } from '../game.schema';
-import { UseInterceptors, Inject, UsePipes, ValidationPipe, UseFilters } from '@nestjs/common';
-import { FieldService } from './field.service';
+import { GAME_STARTED, GetGameAndValidatePlayer, PLAYER_ALIVE } from '@/common/decorators/game.decorator';
 import { AllExceptionsFilter } from '@/common/filters/exception.filter';
 import { GameInterceptor } from '@/common/interceptors/game.interceptor';
+import { Inject, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 import { FieldDto } from './field.dto';
-import { GAME_STARTED, PLAYER_ALIVE, GetGameAndValidatePlayer } from '@/common/decorators/game.decorator';
+import { FieldService } from './field.service';
 
 @WebSocketGateway({ namespace: 'game' })
 @UseFilters(AllExceptionsFilter)
@@ -17,9 +14,6 @@ import { GAME_STARTED, PLAYER_ALIVE, GetGameAndValidatePlayer } from '@/common/d
 export class FieldGateway {
   @Inject(FieldService)
   private readonly service: FieldService;
-
-  @InjectModel(Game.name)
-  private readonly model: Model<Game>;
 
   @SubscribeMessage('field/add')
   @GetGameAndValidatePlayer([GAME_STARTED, PLAYER_ALIVE])

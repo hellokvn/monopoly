@@ -1,7 +1,6 @@
-import { ALL_FIELDS, StreetField } from '@monopoly/sdk';
+import { ALL_FIELDS, Game, Player, PlayerDeptsType, StreetField } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { GameHelper } from '../game.helper';
-import { Game, Player, PlayerDeptsType } from '../game.schema';
 
 @Injectable()
 export class DeptsHelper {

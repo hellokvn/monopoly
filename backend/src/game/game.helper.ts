@@ -1,6 +1,5 @@
-import { Document } from '@/common/types/mongoose.type';
-import { Game, Player, PlayerStatus } from '@/game/game.schema';
-import { BaseEvent } from '@monopoly/sdk';
+import { BaseEvent, Game, Player, PlayerStatus } from '@monopoly/sdk';
+import { InjectRedis, Redis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -8,18 +7,22 @@ interface SaveGameOptions<T extends BaseEvent> {
   event?: { name: string; event: T };
   player?: Player;
   players?: Player[];
+  logs?: string[];
   setNextPlayer?: boolean;
 }
 
 @Injectable()
 export class GameHelper {
+  @InjectRedis()
+  private readonly redis: Redis;
+
   private readonly eventEmitter: EventEmitter2;
 
   constructor(eventEmitter: EventEmitter2) {
     this.eventEmitter = eventEmitter;
   }
 
-  public saveGame<T extends BaseEvent>(game: Document<Game>, opts: SaveGameOptions<T> = {}): Promise<Game> {
+  public async saveGame<T extends BaseEvent>(game: Game, opts: SaveGameOptions<T> = {}): Promise<Game> {
     if (opts.players && opts.players.length) {
       opts.players.forEach((player) => (game.players[player.index] = player));
     } else if (opts.player) {
@@ -49,16 +52,22 @@ export class GameHelper {
       this.eventEmitter.emit('auction.created', opts.event);
     }
 
-    return game.save();
+    await this.redis.set(game.id, JSON.stringify(game));
+
+    if (opts.logs) {
+      game.logs = opts.logs;
+    }
+
+    return game;
   }
 
   public moveActorByForce(
-    game: Document<Game>,
+    game: Game,
     player: Player,
     value: number,
     isMerge: boolean = true,
     isForward: boolean = true,
-  ): Game | Promise<Game> {
+  ): Promise<Game> | Game {
     if (isMerge) {
       if (isForward) {
         player.increasePosition(value);

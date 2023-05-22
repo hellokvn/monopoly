@@ -1,21 +1,15 @@
-import { ALL_FIELDS, FAMILY_STREET_IDS } from '@monopoly/sdk';
+import { ALL_FIELDS, Auction, AuctionType, FAMILY_STREET_IDS, Game } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
-import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { isSet } from 'util/types';
 import { GameHelper } from '../game.helper';
-import { Auction, AuctionType, Game } from '../game.schema';
 import { CreateAuctionByOfferDto } from './auction.dto';
 import { AuctionCreatedEvent } from './auction.event';
 
 @Injectable()
 export class AuctionService {
-  @InjectModel(Game.name)
-  private readonly model: Model<Game>;
-
   @Inject(GameHelper)
   private readonly gameHelper: GameHelper;
 

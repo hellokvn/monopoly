@@ -1,7 +1,7 @@
+import { Game } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game } from '../game.schema';
 import { JAIL_PAYOUT_PRICE } from './jail.constants';
 
 @Injectable()
@@ -22,6 +22,6 @@ export class JailService {
 
     game.logs.push(`${player.name} pays ${JAIL_PAYOUT_PRICE} Gold to be released.`);
 
-    return this.gameHelper.saveGame(game, { player });
+    return this.gameHelper.saveGame(game);
   }
 }

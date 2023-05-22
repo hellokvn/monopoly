@@ -1,8 +1,7 @@
-import { Dice } from '@monopoly/sdk';
+import { Dice, Game, GameStatus } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game, GameStatus } from '../game.schema';
 
 @Injectable()
 export class DiceService {
@@ -17,7 +16,7 @@ export class DiceService {
 
     const setNextPlayer = !dice.isSame || player.isJailed;
 
-    return this.gameHelper.saveGame(game, { player, setNextPlayer });
+    return this.gameHelper.saveGame(game, { setNextPlayer });
   }
 
   public diceToSetOrder({ game, player }: Socket): Promise<Game> {
@@ -47,6 +46,6 @@ export class DiceService {
       game.currentPlayerIndex = game.order[0];
     }
 
-    return this.gameHelper.saveGame(game, { player });
+    return this.gameHelper.saveGame(game);
   }
 }

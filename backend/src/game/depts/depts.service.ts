@@ -1,7 +1,7 @@
+import { Game, PlayerStatus } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game, PlayerStatus } from '../game.schema';
 import { DeptsHelper } from './depts.helper';
 
 @Injectable()
@@ -34,7 +34,7 @@ export class DeptsService {
     if (!canPayDepts) {
       player.status = PlayerStatus.Dead;
       // TODO: Add game over logic
-      return this.gameHelper.saveGame(game, { player });
+      return this.gameHelper.saveGame(game);
     }
 
     const players = this.helper.payDepts(game, player);

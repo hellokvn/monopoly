@@ -1,8 +1,7 @@
-import { Bonus } from '@monopoly/sdk';
+import { Bonus, Game } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game } from '../game.schema';
 
 @Injectable()
 export class ActionService {

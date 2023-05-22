@@ -1,4 +1,4 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Socket } from 'socket.io';
@@ -17,5 +17,5 @@ export class GameInterceptor implements NestInterceptor {
 
 function emitMessage(client: Socket, responseData?: unknown) {
   console.log(client.game);
-  client.to(client.game._id.toString()).emit('update', client.game);
+  client.to(client.game.id.toString()).emit('update', client.game);
 }

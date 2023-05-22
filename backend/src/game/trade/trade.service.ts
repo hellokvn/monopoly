@@ -1,20 +1,14 @@
+import { Game, Trade } from '@monopoly/sdk';
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
 import { WsException } from '@nestjs/websockets';
-import { Model } from 'mongoose';
 import { Socket } from 'socket.io';
 import { GameHelper } from '../game.helper';
-import { Game } from '../game.schema';
 import { CreateTradeDto, TradeDto } from './trade.dto';
 import { TradeStatus } from './trade.enum';
 import { TradeHelper } from './trade.helper';
-import { Trade } from './trade.schema';
 
 @Injectable()
 export class TradeService {
-  @InjectModel(Trade.name)
-  private readonly model: Model<Trade>;
-
   @Inject(TradeHelper)
   private readonly helper: TradeHelper;
 
@@ -23,7 +17,7 @@ export class TradeService {
 
   public async create(client: Socket, payload: CreateTradeDto): Promise<void> {
     const { game, player } = client;
-    const trade = new this.model(game);
+    const trade = new Trade();
 
     trade.playerIndex = player.index;
     trade.targetPlayerIndex = payload.targetPlayerIndex;
@@ -34,7 +28,7 @@ export class TradeService {
 
     this.helper.validateTrade(game, trade);
 
-    await trade.save();
+    game.trades.push(trade);
 
     const targetPlayer = game.players[payload.targetPlayerIndex];
 
@@ -43,7 +37,7 @@ export class TradeService {
 
   public async accept(client: Socket, payload: TradeDto): Promise<Game> {
     const { game, player } = client;
-    const trade = await this.helper.findActiveTrade(payload.tradeId, game, player);
+    const trade = game.trades.find((trade) => trade.id === payload.tradeId && trade.status === TradeStatus.Active);
 
     if (!trade) {
       throw new WsException('No trade found.');
@@ -55,9 +49,9 @@ export class TradeService {
 
     trade.status = TradeStatus.Accepted;
 
-    await trade.save();
+    game.trades.push(trade);
 
-    game.logs.push(`${targetPlayer.name} accepts ${player.name}s trade.`);
+    const logs = [`${targetPlayer.name} accepts ${player.name}s trade.`];
 
     // TODO: Add more logs of what players gets
 
@@ -79,12 +73,12 @@ export class TradeService {
       game.fields[fieldIndex].ownedByPlayerIndex = player.index;
     });
 
-    return this.gameHelper.saveGame(game, { players: [player, targetPlayer] });
+    return this.gameHelper.saveGame(game, { logs, players: [player, targetPlayer] });
   }
 
   public async decline(client: Socket, payload: TradeDto): Promise<void> {
-    const { game, player } = client;
-    const trade = await this.helper.findActiveTrade(payload.tradeId, game, player);
+    const { game } = client;
+    const trade = game.trades.find((trade) => trade.id === payload.tradeId && trade.status === TradeStatus.Active);
 
     if (!trade) {
       throw new WsException('No trade found.');
@@ -98,8 +92,8 @@ export class TradeService {
   }
 
   public async abort(client: Socket, payload: TradeDto): Promise<void> {
-    const { game, player } = client;
-    const trade = await this.helper.findActiveTrade(payload.tradeId, game, player);
+    const { game } = client;
+    const trade = game.trades.find((trade) => trade.id === payload.tradeId && trade.status === TradeStatus.Active);
 
     if (!trade) {
       throw new WsException('No trade found.');

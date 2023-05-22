@@ -1,13 +1,10 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Model } from 'mongoose';
-import { Socket } from 'socket.io';
-import { Game } from '../game.schema';
-import { UseInterceptors, Inject, UsePipes, ValidationPipe, UseFilters } from '@nestjs/common';
-import { DiceService } from './dice.service';
+import { GAME_SET_ORDER, GAME_STARTED, GetGameAndValidatePlayer, PLAYER_ALIVE, PLAYER_TURN } from '@/common/decorators/game.decorator';
 import { AllExceptionsFilter } from '@/common/filters/exception.filter';
 import { GameInterceptor } from '@/common/interceptors/game.interceptor';
-import { GAME_SET_ORDER, GAME_STARTED, GetGameAndValidatePlayer, PLAYER_ALIVE, PLAYER_TURN } from '@/common/decorators/game.decorator';
+import { Inject, UseFilters, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
+import { DiceService } from './dice.service';
 
 @WebSocketGateway({ namespace: 'game' })
 @UseFilters(AllExceptionsFilter)
@@ -16,9 +13,6 @@ import { GAME_SET_ORDER, GAME_STARTED, GetGameAndValidatePlayer, PLAYER_ALIVE, P
 export class DiceGateway {
   @Inject(DiceService)
   private readonly service: DiceService;
-
-  @InjectModel(Game.name)
-  private readonly model: Model<Game>;
 
   @SubscribeMessage('order')
   @GetGameAndValidatePlayer([GAME_SET_ORDER, PLAYER_ALIVE, PLAYER_TURN])
