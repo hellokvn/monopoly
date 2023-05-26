@@ -15,9 +15,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "ts-proto": "^1.147.2"
+    "@types/dashify": "^1.0.1"
   },
   "dependencies": {
-    "random-int": "^3.0.0"
+    "dashify": "^2.0.0"
   }
 }
