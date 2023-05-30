@@ -1,0 +1,86 @@
+body {
+  user-select: none;
+  background-image: url('@/assets/img/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  font-family: 'Open Sans', sans-serif;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+#app {
+  width: 1328px;
+  margin: 0 auto;
+}
+
+header {
+  background-image: url('@/assets/img/header.png');
+  background-position: center;
+  height: 159px;
+  width: 1328px;
+  display: block;
+  margin: 0 auto;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+.btn {
+  outline: none;
+  background: #fff;
+  border: 0 none;
+  cursor: pointer;
+  &.disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+  }
+}
+
+.game {
+  .ui {
+    position: relative;
+    width: 996px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: -70px;
+    z-index: 1;
+  }
+}
+
+.isDisabled {
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+.scroll-bar::-webkit-scrollbar-track {
+  background-color: #ecf0f1;
+}
+
+.scroll-bar::-webkit-scrollbar {
+  width: 5px;
+  background-color: #ecf0f1;
+}
+
+.scroll-bar::-webkit-scrollbar-thumb {
+  background-color: #95a5a6;
+}
+
+.auction-bar::-webkit-scrollbar-track {
+  background-color: none;
+}
+
+.auction-bar::-webkit-scrollbar {
+  width: 5px;
+  background-color: none;
+}
+
+.auction-bar::-webkit-scrollbar-thumb {
+  background-color: #bdc3c7;
+}

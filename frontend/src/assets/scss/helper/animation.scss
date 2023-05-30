@@ -1,0 +1,10 @@
+.ani-zoom {
+  transition: transform 350ms cubic-bezier(0.3, -2, 0.7, 3), opacity 350ms cubic-bezier(0.3, -2, 0.7, 3);
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.ani-zoom.isActive {
+  opacity: 1;
+  transform: scale(1);
+}
