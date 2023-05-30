@@ -1,7 +1,8 @@
-import { Game, GameField, GameStatus, Player, PlayerDepts, PlayerStatus, Trade } from '@monopoly/sdk';
+import { ALL_FIELDS, Game, GameField, GameId, GameStatus, Player, PlayerStatus, isSet, transformGame } from '@monopoly/sdk';
 import { WsException } from '@nestjs/websockets';
 import { plainToClass } from 'class-transformer';
 import { Redis } from 'ioredis';
+import { Socket } from 'socket.io';
 
 export const GAME_WAITING = 'game-waiting';
 export const GAME_SET_ORDER = 'game-set-order';
@@ -14,29 +15,16 @@ const redis = new Redis({
   port: 6379,
 });
 
-function mapDataToGame(data: string | unknown): Game {
+function mapDataToGame(data: string | unknown): Game | undefined {
   if (typeof data === 'string') {
     data = JSON.parse(data);
   }
 
-  const game = plainToClass(Game, data);
+  if (!data) {
+    return;
+  }
 
-  // game.auction = plainToClass(Auction, game.auction) || null;
-
-  game.trades.forEach((trade, index) => {
-    game.trades[index] = plainToClass(Trade, trade);
-  });
-
-  game.fields.forEach((field, index) => {
-    game.fields[index] = plainToClass(GameField, field);
-  });
-
-  game.players.forEach((player, index) => {
-    game.players[index].depts = plainToClass(PlayerDepts, game.players[index].depts);
-    game.players[index] = plainToClass(Player, player);
-  });
-
-  return game;
+  return transformGame(data as Game);
 }
 
 type GamePermission = Array<typeof GAME_WAITING | typeof GAME_SET_ORDER | typeof GAME_STARTED | typeof PLAYER_TURN | typeof PLAYER_ALIVE>;
@@ -60,12 +48,16 @@ export const GetGame =
   (target, key, descriptor) => {
     const originalFunction: any = descriptor.value;
     descriptor.value = async function (this: any) {
+      // eslint-disable-next-line
       if (!arguments || !arguments.length) {
         throw new WsException('No arguments found.');
       }
 
+      // eslint-disable-next-line
       const client = arguments[0];
+      // eslint-disable-next-line
       const payload = arguments[1];
+      console.log(payload);
       const game = mapDataToGame(await redis.get(payload.gameId));
 
       if (!game) {
@@ -78,26 +70,28 @@ export const GetGame =
 
       client.game = game;
 
+      // eslint-disable-next-line
       return originalFunction.apply(this, arguments);
     };
 
     return descriptor;
   };
 
-export const GetGameAndValidatePlayer =
+export const InitializeGame =
   (permissions: GamePermission = [], opts: GameOpts = {}) =>
   (target, key, descriptor) => {
+    // eslint-disable-next-line
     const originalFunction: any = descriptor.value;
 
     descriptor.value = async function (this: any) {
+      // eslint-disable-next-line
       if (!arguments || !arguments.length) {
         throw new WsException('No arguments found.');
       }
 
-      console.log('GetGameAndValidatePlayer');
-
-      const client = arguments[opts.clientIndex || 0];
-      const gameId: string = getGameByRoom(client.rooms);
+      // eslint-disable-next-line
+      const client: Socket = arguments[opts.clientIndex || 0];
+      const gameId: GameId = getGameByRoom(client.rooms);
       const game = mapDataToGame(await redis.get(gameId));
 
       if (!game) {
@@ -105,6 +99,7 @@ export const GetGameAndValidatePlayer =
       }
 
       game.logs = [];
+      game.diceData = null;
 
       if (permissions.includes(GAME_SET_ORDER) && game.status !== GameStatus.SetOrder) {
         throw new WsException(`Game status is wrong. (${game.status})`);
@@ -116,9 +111,7 @@ export const GetGameAndValidatePlayer =
 
       const playerIndex = game.players.findIndex(({ clientId }) => clientId === client.id);
 
-      console.log({ playerIndex, clientId: client.id });
-
-      if (playerIndex === -1) {
+      if (!isSet(playerIndex)) {
         throw new WsException('No player found.');
       }
 
@@ -130,7 +123,7 @@ export const GetGameAndValidatePlayer =
         game.fields[index] = plainToClass(GameField, game.fields[index]);
       }
 
-      const player: Player = game.players[playerIndex];
+      const player = game.players[playerIndex];
 
       if (permissions.includes(PLAYER_ALIVE) && player.status !== PlayerStatus.Alive) {
         throw new WsException('Player is not alive.');
@@ -142,7 +135,9 @@ export const GetGameAndValidatePlayer =
 
       client.game = game;
       client.player = player;
+      client.field = { info: ALL_FIELDS[game.currentFieldIndex], data: game.fields[game.currentFieldIndex] };
 
+      // eslint-disable-next-line
       return originalFunction.apply(this, arguments);
     };
 
